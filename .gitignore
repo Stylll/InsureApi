@@ -408,3 +408,4 @@ ASALocalRun/
 **/appsettings.[Dd]evelopment.json
 **/appsettings.[Ss]taging.json
 **/appsettings.[Pp]roduction.json
+**/appsettings.[Tt]esting.json
