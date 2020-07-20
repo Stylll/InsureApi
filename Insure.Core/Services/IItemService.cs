@@ -9,5 +9,7 @@ namespace Insure.Core.Services
     public interface IItemService
     {
         Task<Item> CreateItem(Item item);
+        Task<Item> GetItemById(int id);
+        Task DeleteItem(Item item);
     }
 }

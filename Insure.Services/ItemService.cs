@@ -24,5 +24,17 @@ namespace Insure.Services
 
             return item;
         }
+
+        public async Task DeleteItem(Item item)
+        {
+            unitOfWork.Item.Remove(item);
+            await unitOfWork.CommitAsync();
+        }
+
+
+        public async Task<Item> GetItemById(int id)
+        {
+            return await unitOfWork.Item.GetByIdAsync(id);
+        }
     }
 }

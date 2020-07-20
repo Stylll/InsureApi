@@ -87,5 +87,38 @@ namespace Insure.Api.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
         }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<Response>> DeleteItem(int id)
+        {
+            try
+            {
+                var item = await itemService.GetItemById(id);
+                if (item == null)
+                {
+                    var erResponse = new Response()
+                    {
+                        Status = StatusCodes.Status404NotFound,
+                        Message = string.Format("Item with id: {0} does not exist", id)
+                    };
+
+                    return NotFound(erResponse);
+                }
+
+                await itemService.DeleteItem(item);
+
+                return NoContent();
+            }
+            catch (Exception)
+            {
+                var response = new Response()
+                {
+                    Message = "An unexpected error occurred. Please try again",
+                    Status = StatusCodes.Status500InternalServerError
+                };
+
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+        }
     }
 }

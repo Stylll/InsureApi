@@ -9,5 +9,6 @@ namespace Insure.Core.Repositories
     public interface IItemRepository : IRepository<Item>
     {
         Task<Item> GetWithCategoryByIdAsync(int id);
+
     }
 }

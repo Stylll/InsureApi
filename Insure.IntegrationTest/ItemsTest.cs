@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Insure.IntegrationTest.Helpers;
 using Insure.Api.Resources;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Insure.IntegrationTest
 {
@@ -51,31 +52,14 @@ namespace Insure.IntegrationTest
         }
 
         [Fact]
-        public async Task Create_Endpoint_Returns_Item1()
+        public async Task Delete_Endpoint_Returns_Nocontent()
         {
-            var requestBodyObject = new
-            {
-                Name = "Electronics",
-                CategoryId = 2,
-                Value = 453.23,
-            };
-
-            var request = new
-            {
-                url = "/api/v1/items",
-                body = Utilities.ConvertToStringContent(requestBodyObject)
-            };
-
             var client = factory.CreateClient();
+            var url = "/api/v1/items/1";
 
-            var response = await client.PostAsync(request.url, request.body);
-            var value = await response.Content.ReadAsStringAsync();
+            var response = await client.DeleteAsync(url);
             response.EnsureSuccessStatusCode();
-
-            var sResponse = JsonConvert.DeserializeObject<SuccessResponse<ItemResource>>(value);
-            Assert.Equal("Item saved successfully", sResponse.Message);
-            Assert.Equal(201, sResponse.Status);
-            Assert.Equal("Electronics", sResponse.Data.Name);
+            Assert.Equal("NoContent", response.StatusCode.ToString());
         }
     }
 }
