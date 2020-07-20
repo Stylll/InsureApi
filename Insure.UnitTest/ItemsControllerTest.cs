@@ -34,7 +34,7 @@ namespace Insure.UnitTest
         [Fact]
         public async Task CreateItem_Returns_Badrequest()
         {
-            var saveItem = new SaveItemResource(){};
+            var saveItem = new SaveItemResource() { };
 
             var validationErrors = new List<ValidationResource>()
             {
@@ -44,7 +44,7 @@ namespace Insure.UnitTest
                 new ValidationResource { ErrorMessage = "Value must be greater than zero", PropertyName = "Value" },
             };
 
-            mapper.Setup(mapper => 
+            mapper.Setup(mapper =>
             mapper.Map<IEnumerable<ValidationFailure>,
             IEnumerable<ValidationResource>>(It.IsAny<IList<ValidationFailure>>()))
                 .Returns(validationErrors);
@@ -94,7 +94,7 @@ namespace Insure.UnitTest
             var saveItemModel = new Item()
             { Name = saveItem.Name, Value = saveItem.Value, CategoryId = saveItem.CategoryId };
             var category = new Category() { Id = 2, Name = "Electronics" };
-            var item = new Item() 
+            var item = new Item()
             { Id = 1, Name = saveItem.Name, Value = saveItem.Value, CategoryId = saveItem.CategoryId };
             var itemResource = new ItemResource()
             {
@@ -135,6 +135,55 @@ namespace Insure.UnitTest
             var controller = new ItemsController(itemService.Object, categoryService.Object, mapper.Object);
 
             var result = await controller.CreateItem(saveItem);
+            Assert.IsType<ActionResult<Response>>(result);
+            var res = Assert.IsType<ObjectResult>(result.Result);
+            var value = Assert.IsType<Response>(res.Value);
+            Assert.Equal("An unexpected error occurred. Please try again", value.Message);
+        }
+
+        [Fact]
+        public async Task DeleteItem_Returns_Notfound()
+        {
+            var itemId = 1;
+            itemService.Setup(service => service.GetItemById(itemId)).ReturnsAsync((Item)null);
+            var controller = new ItemsController(itemService.Object, categoryService.Object, mapper.Object);
+
+            var result = await controller.DeleteItem(itemId);
+
+            Assert.IsType<ActionResult<Response>>(result);
+            var res = Assert.IsType<NotFoundObjectResult>(result.Result);
+            var value = Assert.IsType<Response>(res.Value);
+            Assert.Equal("Item with id: 1 does not exist", value.Message);
+        }
+
+        [Fact]
+        public async Task DeleteItem_Returns_Ok()
+        {
+            var item = new Item()
+            {
+                Id = 1,
+                Name = "Electronics",
+                Value = 6000
+            };
+            itemService.Setup(service => service.GetItemById(item.Id)).ReturnsAsync(item);
+            itemService.Setup(service => service.DeleteItem(item));
+
+            var controller = new ItemsController(itemService.Object, categoryService.Object, mapper.Object);
+
+            var result = await controller.DeleteItem(item.Id);
+
+            Assert.IsType<ActionResult<Response>>(result);
+            Assert.IsType<NoContentResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task DeleteItem_Returns_Handled_Exception()
+        {
+            itemService.Setup(service => service.GetItemById(1)).Throws(new IOException());
+
+            var controller = new ItemsController(itemService.Object, categoryService.Object, mapper.Object);
+
+            var result = await controller.DeleteItem(1);
             Assert.IsType<ActionResult<Response>>(result);
             var res = Assert.IsType<ObjectResult>(result.Result);
             var value = Assert.IsType<Response>(res.Value);

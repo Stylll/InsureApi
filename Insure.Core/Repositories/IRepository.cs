@@ -9,5 +9,6 @@ namespace Insure.Core.Repositories
     {
         Task<TEntity> GetByIdAsync(int id);
         Task AddAsync(TEntity entity);
+        void Remove(TEntity entity);
     }
 }

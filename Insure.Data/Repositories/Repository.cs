@@ -24,5 +24,10 @@ namespace Insure.Data.Repositories
         {
            return await context.Set<TEntity>().FindAsync(id);
         }
+
+        public void Remove(TEntity entity)
+        {
+            context.Set<TEntity>().Remove(entity);
+        }
     }
 }
