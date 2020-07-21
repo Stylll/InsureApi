@@ -2,7 +2,7 @@
 A simple web app to manage a list of high value items
 
 ## Features
-* User add an item
+* User can add an item
 * User can delete an item
 * User can view all items with categories and total sum
 
