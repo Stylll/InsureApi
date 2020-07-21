@@ -34,13 +34,10 @@ namespace Insure.UnitTest
         [Fact]
         public async Task CreateItem_Returns_Badrequest()
         {
-            var saveItem = new SaveItemResource() { };
+            var saveItem = new SaveItemInputResource() { Name = "TV", CategoryId = "2", Value = "0" };
 
             var validationErrors = new List<ValidationResource>()
             {
-                new ValidationResource { ErrorMessage = "Name cannot be empty", PropertyName = "Name" },
-                new ValidationResource { ErrorMessage = "Value cannot be empty", PropertyName = "Value" },
-                new ValidationResource { ErrorMessage = "CategoryId cannot be empty", PropertyName = "CategoryId" },
                 new ValidationResource { ErrorMessage = "Value must be greater than zero", PropertyName = "Value" },
             };
 
@@ -57,7 +54,30 @@ namespace Insure.UnitTest
             var res = Assert.IsType<BadRequestObjectResult>(result.Result);
             var value = Assert.IsType<ErrorResponse<IEnumerable<ValidationResource>>>(res.Value);
             Assert.Equal("Bad Request", value.Message);
-            Assert.Equal(4, value.Errors.Count());
+            Assert.Equal("Value must be greater than zero", value.Errors.FirstOrDefault().ErrorMessage);
+        }
+
+        [Fact]
+        public async Task CreateItem_Returns_Badrequest_CustomValidation()
+        {
+            var saveItem = new SaveItemInputResource() { Name = "TV",  Value = "value", CategoryId = "categoryId" };
+
+            var validationErrors = new List<ValidationResource>()
+            {
+                new ValidationResource { ErrorMessage = "Value must be a number or float", PropertyName = "Value" },
+                new ValidationResource { ErrorMessage = "CategoryId must be a number", PropertyName = "CategoryId" },
+            };
+
+            var controller = new ItemsController(itemService.Object, categoryService.Object, mapper.Object);
+
+            var result = await controller.CreateItem(saveItem);
+
+            Assert.IsType<ActionResult<Response>>(result);
+            var res = Assert.IsType<BadRequestObjectResult>(result.Result);
+            var value = Assert.IsType<ErrorResponse<IEnumerable<ErrorResource>>>(res.Value);
+            Assert.Equal("Bad Request", value.Message);
+            Assert.Equal("Value must be a number or float", value.Errors.FirstOrDefault().ErrorMessage);
+            Assert.Equal(2, value.Errors.Count());
         }
 
         // Notfound
@@ -65,11 +85,11 @@ namespace Insure.UnitTest
         public async Task CreateItem_Returns_Notfound()
         {
             categoryService.Setup(service => service.GetCategoryById(2)).ReturnsAsync((Category)null);
-            var saveItem = new SaveItemResource()
+            var saveItem = new SaveItemInputResource()
             {
                 Name = "Book",
-                CategoryId = 2,
-                Value = 20,
+                CategoryId = "2",
+                Value = "20",
             };
 
             var controller = new ItemsController(itemService.Object, categoryService.Object, mapper.Object);
@@ -91,12 +111,18 @@ namespace Insure.UnitTest
                 CategoryId = 2,
                 Value = 20,
             };
+            var saveItemInput = new SaveItemInputResource()
+            {
+                Name = "Book",
+                CategoryId = "2",
+                Value = "20",
+            };
             var saveItemModel = new Item()
             { Name = saveItem.Name, Value = saveItem.Value, CategoryId = saveItem.CategoryId };
             var category = new Category() { Id = 2, Name = "Electronics" };
             var item = new Item()
             { Id = 1, Name = saveItem.Name, Value = saveItem.Value, CategoryId = saveItem.CategoryId };
-            var itemResource = new ItemResource()
+            var itemResource = new ItemCategoryResource()
             {
                 Id = item.Id,
                 Name = item.Name,
@@ -107,14 +133,14 @@ namespace Insure.UnitTest
             categoryService.Setup(service => service.GetCategoryById(2)).ReturnsAsync(category);
             itemService.Setup(service => service.CreateItem(It.IsAny<Item>())).ReturnsAsync(item);
             mapper.Setup(mapper => mapper.Map<SaveItemResource, Item>(saveItem)).Returns(item);
-            mapper.Setup(mapper => mapper.Map<Item, ItemResource>(item)).Returns(itemResource);
+            mapper.Setup(mapper => mapper.Map<Item, ItemCategoryResource>(item)).Returns(itemResource);
 
             var controller = new ItemsController(itemService.Object, categoryService.Object, mapper.Object);
 
-            var result = await controller.CreateItem(saveItem);
+            var result = await controller.CreateItem(saveItemInput);
             Assert.IsType<ActionResult<Response>>(result);
             var res = Assert.IsType<ObjectResult>(result.Result);
-            var value = Assert.IsType<SuccessResponse<ItemResource>>(res.Value);
+            var value = Assert.IsType<SuccessResponse<ItemCategoryResource>>(res.Value);
             Assert.Equal(201, res.StatusCode);
             Assert.Equal("Item saved successfully", value.Message);
             Assert.Equal(itemResource, value.Data);
@@ -131,10 +157,16 @@ namespace Insure.UnitTest
                 CategoryId = 2,
                 Value = 20,
             };
+            var saveItemInput = new SaveItemInputResource()
+            {
+                Name = "Book",
+                CategoryId = "2",
+                Value = "20",
+            };
 
             var controller = new ItemsController(itemService.Object, categoryService.Object, mapper.Object);
 
-            var result = await controller.CreateItem(saveItem);
+            var result = await controller.CreateItem(saveItemInput);
             Assert.IsType<ActionResult<Response>>(result);
             var res = Assert.IsType<ObjectResult>(result.Result);
             var value = Assert.IsType<Response>(res.Value);

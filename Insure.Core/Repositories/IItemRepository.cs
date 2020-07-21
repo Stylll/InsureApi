@@ -10,5 +10,7 @@ namespace Insure.Core.Repositories
     {
         Task<Item> GetWithCategoryByIdAsync(int id);
 
+        float GetSumTotal();
+
     }
 }

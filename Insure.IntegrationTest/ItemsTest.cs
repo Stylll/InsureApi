@@ -29,8 +29,8 @@ namespace Insure.IntegrationTest
             var requestBodyObject = new
             {
                 Name = "Electronics",
-                CategoryId = 2,
-                Value = 453.23,
+                CategoryId = "2",
+                Value = "453.23",
             };
 
             var request = new
@@ -45,7 +45,7 @@ namespace Insure.IntegrationTest
             var value = await response.Content.ReadAsStringAsync();
             response.EnsureSuccessStatusCode();
 
-            var sResponse = JsonConvert.DeserializeObject<SuccessResponse<ItemResource>>(value);
+            var sResponse = JsonConvert.DeserializeObject<SuccessResponse<ItemCategoryResource>>(value);
             Assert.Equal("Item saved successfully", sResponse.Message);
             Assert.Equal(201, sResponse.Status);
             Assert.Equal("Electronics", sResponse.Data.Name);

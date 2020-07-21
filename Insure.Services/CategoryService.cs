@@ -22,10 +22,10 @@ namespace Insure.Services
             return await unitOfWork.Category.GetByIdAsync(id);
         }
 
-        public async Task DeleteItem(Item item)
+        public async Task<IEnumerable<CategoryItemsTotal>> GetAllWithItems()
         {
-            unitOfWork.Item.Remove(item);
-            await unitOfWork.CommitAsync();
+            var categoryList = await unitOfWork.Category.GetAllWithItemsTotal();
+            return categoryList;
         }
     }
 }

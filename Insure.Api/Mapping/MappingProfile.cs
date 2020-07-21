@@ -14,11 +14,13 @@ namespace Insure.Api.Mapping
         public MappingProfile()
         {
             // model to resource mapping
+            CreateMap<Item, ItemCategoryResource>();
             CreateMap<Item, ItemResource>();
             CreateMap<Category, CategoryResource>();
+            CreateMap<CategoryItemsTotal, CategoriesTotalResource>();
 
             // resource to model mapping
-            CreateMap<ItemResource, Item>();
+            CreateMap<ItemCategoryResource, Item>();
             CreateMap<CategoryResource, Category>();
             CreateMap<SaveItemResource, Item>();
 

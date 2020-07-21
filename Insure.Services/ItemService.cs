@@ -36,5 +36,11 @@ namespace Insure.Services
         {
             return await unitOfWork.Item.GetByIdAsync(id);
         }
+
+        public float GetItemsTotal()
+        {
+            var total = unitOfWork.Item.GetSumTotal();
+            return total;
+        }
     }
 }

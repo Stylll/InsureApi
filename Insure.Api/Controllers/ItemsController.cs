@@ -30,23 +30,60 @@ namespace Insure.Api.Controllers
         }
 
         [HttpPost("")]
-        public async Task<ActionResult<Response>> CreateItem([FromBody]SaveItemResource item)
+        public async Task<ActionResult<Response>> CreateItem([FromBody]SaveItemInputResource inputItem)
         {
             try
             {
+                var errorList = new List<ErrorResource>();
+                float floatValue;
+                int intCategoryId;
+
+                // custom validate input
+                var isFloat = float.TryParse(inputItem.Value, out floatValue);
+                var isInt = int.TryParse(inputItem.CategoryId, out intCategoryId);
+
+                // validate name is not empty
+                if (inputItem.Name == "")
+                {
+                    errorList.Add(new ErrorResource { PropertyName = "Name", ErrorMessage = "Name cannot be empty" });
+                }
+
+                // validate value is float
+                if (!isFloat)
+                {
+                    errorList.Add(new ErrorResource { PropertyName = "Value", ErrorMessage = "Value must be a number or float" });
+                }
+                // validate categoryId is int
+                if (!isInt)
+                {
+                    errorList.Add(new ErrorResource { PropertyName = "CategoryId", ErrorMessage = "CategoryId must be a number" });
+                }
+
+                if (errorList.Count > 0)
+                {
+                    var errors = new ErrorResponse<IEnumerable<ErrorResource>>();
+                    errors.Message = "Bad Request";
+                    errors.Status = StatusCodes.Status400BadRequest;
+                    errors.Errors = errorList;
+
+                    return BadRequest(errors);
+                }
+
+                var item = new SaveItemResource() { CategoryId = intCategoryId, Value = floatValue, Name = inputItem.Name };
+
                 // validate input
                 var validator = new SaveItemResourceValidator();
                 var validationResult = await validator.ValidateAsync(item);
-                var errorReponse = new ErrorResponse<IEnumerable<ValidationResource>>();
+                var errorResponse = new ErrorResponse<IEnumerable<ValidationResource>>();
 
                 if (!validationResult.IsValid)
                 {
                     var validationErrors = mapper.Map<IEnumerable<ValidationFailure>, IEnumerable<ValidationResource>>(validationResult.Errors);
-                    errorReponse.Message = "Bad Request";
-                    errorReponse.Status = StatusCodes.Status400BadRequest;
-                    errorReponse.Errors = validationErrors;
+                    errorResponse.Message = "Bad Request";
+                    errorResponse.Status = StatusCodes.Status400BadRequest;
+                    errorResponse.Errors = validationErrors;
 
-                    return BadRequest(errorReponse);
+                    return BadRequest(errorResponse);
                 }
 
                 // check if category id already exists
@@ -65,8 +102,8 @@ namespace Insure.Api.Controllers
                 // save to db
                 var itemToSave = mapper.Map<SaveItemResource, Item>(item);
                 var savedItem = await itemService.CreateItem(itemToSave);
-                var itemResponse = mapper.Map<Item, ItemResource>(savedItem);
-                var response = new SuccessResponse<ItemResource>()
+                var itemResponse = mapper.Map<Item, ItemCategoryResource>(savedItem);
+                var response = new SuccessResponse<ItemCategoryResource>()
                 {
                     Message = "Item saved successfully",
                     Status = StatusCodes.Status201Created,
