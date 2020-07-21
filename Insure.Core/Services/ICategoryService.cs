@@ -9,5 +9,7 @@ namespace Insure.Core.Services
     public interface ICategoryService
     {
         Task<Category> GetCategoryById(int id);
+
+        Task<IEnumerable<CategoryItemsTotal>> GetAllWithItems();
     }
 }

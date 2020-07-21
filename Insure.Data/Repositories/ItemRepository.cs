@@ -3,6 +3,7 @@ using Insure.Core.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,6 +22,12 @@ namespace Insure.Data.Repositories
             {
                 return context as InsureDbContext;
             }
+        }
+
+        public float GetSumTotal()
+        {
+            var total = (from c in context.Items select c.Value).Sum();
+            return total;
         }
 
         public async Task<Item> GetWithCategoryByIdAsync(int id)

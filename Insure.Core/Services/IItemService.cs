@@ -11,5 +11,6 @@ namespace Insure.Core.Services
         Task<Item> CreateItem(Item item);
         Task<Item> GetItemById(int id);
         Task DeleteItem(Item item);
+        float GetItemsTotal();
     }
 }
