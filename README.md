@@ -15,7 +15,7 @@ A simple web app to manage a list of high value items
 <table>
 <tr><th>HTTP VERB</th><th>ENDPOINTS</th><th>DESCRIPTION</th><th>BODY PARAMS</th></tr>
 <tr><td>POST</td><td>/api/v1/items</td><td>Creates an item</td><td>Name, Value, CategoryId</td></tr>
-<tr><td>DELETE</td><td>/api/v1/item/:id</td><td>Deletes an item</td><td></td></tr>
+<tr><td>DELETE</td><td>/api/v1/items/:id</td><td>Deletes an item</td><td></td></tr>
 <tr><td>GET</td><td>/api/v1/categories/items</td><td>Retrieves the list of items with their categories</td><td></td></tr>
 </table>
 
